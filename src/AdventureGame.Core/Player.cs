@@ -4,11 +4,13 @@ namespace AdventureGame.Core
 {
     public class Player : ICharacter
     {
-        public int Health {get; set;} = 100;
-        public int MaxHealth {get; set;} = 150;
+        public int Health {get; private set;} = 100;
+
+        public int MaxHealth = 150;
 
         public List<Item> Inventory = new List<Item>();
-         public Weapon EquippedWeapon = null;
+        
+        public Weapon EquippedWeapon = null;
 
         public bool Alive
         {
@@ -18,8 +20,8 @@ namespace AdventureGame.Core
         public int Attack()
         {
             if (EquippedWeapon == null)
-                return 1;
-            return 1 + EquippedWeapon.AttackModifier;
+                return 10;
+            return 10 + EquippedWeapon.AttackModifier;
         }
 
         public void TakeDamage(int amount)
@@ -41,5 +43,5 @@ namespace AdventureGame.Core
                 Inventory.Add(item);
             }
         }
-        }
     }
+}

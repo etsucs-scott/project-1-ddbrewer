@@ -6,10 +6,10 @@ namespace AdventureGame.Core
 {
     int Health {get;}
 
-    void TakeDamage(int amount);
+    bool Alive {get;}
 
     int Attack();
 
-    bool Alive {get;}
+    void TakeDamage(int amount);
 }
 }
