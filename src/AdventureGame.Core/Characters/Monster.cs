@@ -2,8 +2,8 @@ namespace AdventureGame.Core
 {
     public class Monster : ICharacter
     {
-        private static Random random = new Random();
-        
+        private static Random random = new Random(); // Added to allow Monster to have a random hp value from 30-50.
+
         public int Health { get; private set; }
         public int AttackPower { get; private set; }
         public bool IsAlive => Health > 0;
