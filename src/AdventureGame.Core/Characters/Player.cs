@@ -4,7 +4,6 @@ namespace AdventureGame.Core
 {
     public class Player : ICharacter
     {
-        public string Name { get; private set; }
         public int Health { get; private set; }
         public int MaxHealth { get; } = 150;
         public int AttackPower => 10 + BestWeaponModifier;
@@ -13,9 +12,8 @@ namespace AdventureGame.Core
         public List<Weapon> Weapons { get; } = new List<Weapon>();
         public int BestWeaponModifier { get; private set; }
 
-        public Player(string name)
+        public Player()
         {
-            Name = name;
             Health = 100;
             BestWeaponModifier = 0;
         }
