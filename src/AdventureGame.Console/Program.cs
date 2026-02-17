@@ -5,22 +5,25 @@ class Program // To sanity check: dotnet run --project src/AdventureGame.Console
 {
     static void Main()
     {
-        Maze maze = new Maze(10, 10);
+        Random rng = new Random();
 
-        // Wall and Exit
-        maze.SetExit(9, 9);
-        maze.SetWall(3, 3);
+        Position start = new Position(0, 0);
+        Position exit = new Position(9, 9);
 
-        // Items
-        maze.PlaceItem(2, 2, new Potion());
-        maze.PlaceItem(4, 1, new Weapon("Sword", "You picked up the sword!", 10));
-
-        // Monsters
-        maze.PlaceMonster(5, 5, new Monster());
+        Maze maze = MazeGenerator.Generate(
+            width: 10,
+            height: 10,
+            start: start,
+            exit: exit,
+            wallPercent: 25,
+            potionCount: 3,
+            weaponCount: 3,
+            monsterCount: 3,
+            rng: rng
+        );
 
         Player player = new Player();
-
-        GameEngine engine = new GameEngine(maze, player, new Position(0,0));
+        GameEngine engine = new GameEngine(maze, player, start);
         engine.Run();
     }
 }

@@ -22,7 +22,7 @@ namespace AdventureGame.Core
 
             while (!_gameOver)
             {
-                DrawSimple();
+                DrawMaze();
 
                 ConsoleKeyInfo keyInfo = Console.ReadKey(true);
 
@@ -32,9 +32,8 @@ namespace AdventureGame.Core
                 TryMoveFromKey(keyInfo);
             }
 
-            DrawSimple();
+            DrawMaze();
             Console.WriteLine();
-            Console.WriteLine("You found the exit! Congratulations!");
             Console.WriteLine("Press any key to close the game...");
             Console.ReadKey(true);
         }
@@ -62,44 +61,45 @@ namespace AdventureGame.Core
 
             Position next = PlayerPosition.Move(dx, dy);
 
-            if (_maze.InBounds(next.X, next.Y) && _maze.IsWalkable(next.X, next.Y))
+            // Out of bounds error
+            if (!_maze.InBounds(next.X, next.Y))
             {
-                PlayerPosition = next;
-                HandleTileEntered(next.X, next.Y);
+                ShowMessage("You can't go that way.");
+                return;
             }
+
+            // Wall error
+            if (!_maze.IsWalkable(next.X, next.Y))
+            {
+                ShowMessage("You bumped into a wall.");
+                return;
+            }
+
+            // Valid movement
+            PlayerPosition = next;
+            HandleTileEntered(next.X, next.Y);
         }
 
         private void HandleTileEntered(int x, int y) // Checks tiles for exit, monster, or item
         {
             Tile tile = _maze.GetTile(x, y);
 
+            // Exit
             if (tile.Type == TileType.Exit)
             {
                 _gameOver = true;
+                _win = true;
+                ShowMessage("You found the exit!");
                 return;
             }
 
             // Combat
             if (tile.Monster != null && tile.Monster.IsAlive)
             {
-                Monster monster = tile.Monster;
+                HandleCombat(tile);
 
-                while (_player.IsAlive && monster.IsAlive)
-                {
-                    _player.Attack(monster);
-
-                    if (monster.IsAlive)
-                        monster.Attack(_player);
-                }
-
-                if (!monster.IsAlive)
-                    tile.RemoveMonster();
-
-                if (!_player.IsAlive)
-                {
-                    _gameOver = true;
+                if (_gameOver)
                     return;
-                }
             }
 
             // Item pickup
@@ -111,17 +111,52 @@ namespace AdventureGame.Core
                 if (item is Potion potion)
                 {
                     potion.Use(_player);
+                    ShowMessage(item.PickUpMessage);
                 }
 
                 // Weapon: store in inventory (list), highest mod applies
                 else if (item is Weapon weapon)
                 {
                     _player.PickUpWeapon(weapon);
+                    ShowMessage(item.PickUpMessage);
                 }
             }
         }
 
-        private void DrawSimple()
+        private void HandleCombat(Tile tile)
+        {
+            Monster monster = tile.Monster;
+            if (monster == null || !monster.IsAlive)
+                return;
+            
+            ShowMessage("A monster attacks!");
+
+            while (_player.IsAlive && monster.IsAlive)
+            {
+                // Player turn
+                _player.Attack(monster);
+                if (!monster.IsAlive)
+                    break;
+                
+                // Monster turn
+                monster.Attack(_player);
+            }
+
+            if (!monster.IsAlive)
+            {
+                tile.RemoveMonster();
+                ShowMessage("You defeated the monster!");
+            }
+
+            if (!_player.IsAlive)
+            {
+                _gameOver = true;
+                _win = false;
+                ShowMessage("You died...");
+            }
+        }
+
+        private void DrawMaze()
         {
             Console.SetCursorPosition(0, 0);
 
@@ -150,8 +185,20 @@ namespace AdventureGame.Core
 
             Console.WriteLine($"HP: {_player.Health}/{_player.MaxHealth} || ATK: {_player.AttackPower}");
             Console.WriteLine("Movement: Arrow Keys or WASD || Quit: ESC");
+
+            // Sloppy pickup item text fix:
+            Console.WriteLine((_lastMessage ?? "").PadRight(Console.WindowWidth));
         }
 
+        // To show pickup messages in the game
+        private string _lastMessage = "";
+
+        private void ShowMessage(string message)
+        {
+            _lastMessage = message;
+        }
+        
         private bool _gameOver;
+        private bool _win;
     }
 }

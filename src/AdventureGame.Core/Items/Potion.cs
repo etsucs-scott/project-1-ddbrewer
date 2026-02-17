@@ -5,7 +5,7 @@ namespace AdventureGame.Core
         private const int HealAmount = 20;
 
         public Potion()
-            :base("Health Potion", "You're feeling invigorated!") { }
+            :base("Health Potion", "You picked up the potion! You're feeling invigorated!") { }
 
         public void Use(Player player)
         {
